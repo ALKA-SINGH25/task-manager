@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: taskmanager-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MONGODB_URL
+        value: your-atlas-url
+      - key: DATABASE_NAME
+        value: taskmanager
+      - key: SECRET_KEY
+        value: your-super-secret-key
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: FRONTEND_URL
+        value: https://task-manager-ws9a.vercel.app
