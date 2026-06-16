@@ -78,6 +78,7 @@ class TaskUpdate(BaseModel):
 
 class TaskResponse(BaseModel):
     id: str
+    _id: str
     title: str
     description: Optional[str] = None
     status: str
@@ -85,21 +86,9 @@ class TaskResponse(BaseModel):
     end_date: Optional[datetime] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-    is_active: bool = True
     version: int = 1
-
-
-class TaskHistoryResponse(BaseModel):
-    id: str
-    task_id: str
-    version: int
-    title: str
-    description: Optional[str] = None
-    status: str
-    end_date: Optional[datetime] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    history_created_at: datetime
+    is_latest: bool = True
+    task_version_id: Optional[str] = None
 
 
 def serialize_datetime(value: Optional[datetime]) -> Optional[str]:
@@ -111,9 +100,11 @@ def serialize_datetime(value: Optional[datetime]) -> Optional[str]:
 
 
 def serialize_task(task: dict) -> dict:
+    task_group_id = task.get("task_group_id", str(task["_id"]))
     return {
-        "id": task["_id"],
-        "_id": task["_id"],
+        "id": task_group_id,
+        "_id": task_group_id,
+        "task_version_id": str(task["_id"]),
         "title": task["title"],
         "description": task.get("description"),
         "status": task["status"],
@@ -121,21 +112,6 @@ def serialize_task(task: dict) -> dict:
         "end_date": serialize_datetime(task.get("end_date")),
         "created_at": serialize_datetime(task.get("created_at")),
         "updated_at": serialize_datetime(task.get("updated_at")),
-        "is_active": task.get("is_active", True),
         "version": task.get("version", 1),
-    }
-
-
-def serialize_history(record: dict) -> dict:
-    return {
-        "id": record["_id"],
-        "task_id": record["task_id"],
-        "version": record["version"],
-        "title": record["title"],
-        "description": record.get("description"),
-        "status": record["status"],
-        "end_date": serialize_datetime(record.get("end_date")),
-        "created_at": serialize_datetime(record.get("created_at")),
-        "updated_at": serialize_datetime(record.get("updated_at")),
-        "history_created_at": serialize_datetime(record["history_created_at"]),
+        "is_latest": task.get("is_latest", True),
     }

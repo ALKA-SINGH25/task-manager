@@ -29,10 +29,9 @@ def create(task: TaskCreate, current_user: dict = Depends(get_current_user)):
 
 @router.get("/tasks")
 def get_tasks(
-    include_inactive: bool = Query(default=False),
     current_user: dict = Depends(get_current_user),
 ):
-    return fetch_all_tasks(current_user["_id"], include_inactive=include_inactive)
+    return fetch_all_tasks(current_user["_id"])
 
 
 @router.get("/tasks/{task_id}")

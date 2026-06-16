@@ -150,23 +150,6 @@ User updates task (version 2)
 ┌───────────────────────────┐
 │ Update task in tasks      │  version → 2, updated_at → now
 └───────────────────────────┘
-```
-
-History is **not** created on create or soft delete — only on **update**.
-
----
-
-## Relationships
-
-```
-users._id  ──────►  tasks.user_id        (one-to-many)
-tasks._id  ──────►  task_history.task_id (one-to-many)
-```
-
-- No foreign key constraints (MongoDB is schemaless)
-- Relationships enforced in application code (`use_cases/task_use_case.py`)
-
----
 
 ## Recommended Indexes (optional, not yet in code)
 
