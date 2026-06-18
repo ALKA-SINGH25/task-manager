@@ -1,13 +1,22 @@
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.task_routes import router as task_router
 from api.auth_routes import router as auth_router
+from database import initialize_indexes
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
+# Configure basic logging for the application
+logging.basicConfig(level=logging.INFO)
+
 app = FastAPI()
+
+@app.on_event("startup")
+def startup_event():
+    initialize_indexes()
 
 app.add_middleware(
     CORSMiddleware,
