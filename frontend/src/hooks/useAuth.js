@@ -3,7 +3,7 @@ import axiosInstance from "../config/axiosInstance";
 import { useAuth } from "../context/AuthContext";
 
 const useAuthActions = () => {
-  const { login, logout, token } = useAuth();
+  const { login, token } = useAuth();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
