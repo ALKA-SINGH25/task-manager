@@ -182,6 +182,30 @@ db.task_history.createIndex({ "task_id": 1, "version": 1 })
 | `PUT /tasks/{id}`               | `tasks`, `task_history` |
 | `DELETE /tasks/{id}`            | `tasks` (soft delete)   |
 | `GET /tasks/{id}/history`       | `task_history`          |
+| `POST /expenses`                | `expenses`              |
+| `GET /expenses`                 | `expenses`              |
+| `GET /expenses/{id}`            | `expenses`              |
+| `PUT /expenses/{id}`            | `expenses`              |
+| `DELETE /expenses/{id}`         | `expenses` (soft delete)|
+
+---
+
+## Collection: `expenses`
+
+Stores user expenses.
+
+| Field          | Type     | Required | Default   | Description                              |
+|----------------|----------|----------|-----------|------------------------------------------|
+| `_id`          | ObjectId | Yes      | Auto      | Unique expense ID                        |
+| `user_id`      | String   | Yes      | —         | Owner's user ID                          |
+| `title`        | String   | Yes      | —         | Expense title                            |
+| `amount`       | Number   | Yes      | —         | Expense amount                           |
+| `category`     | String   | Yes      | —         | Expense category                         |
+| `description`  | String   | No       | `null`    | Optional description                     |
+| `expense_date` | DateTime | Yes      | —         | Date of the expense                      |
+| `created_at`   | DateTime | Yes      | On create | When the record was created (UTC)        |
+| `updated_at`   | DateTime | Yes      | On create | Last update time (UTC)                   |
+| `is_active`    | Boolean  | Yes      | `true`    | `false` = soft deleted                   |
 
 ---
 

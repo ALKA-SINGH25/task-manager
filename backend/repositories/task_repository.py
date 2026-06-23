@@ -33,16 +33,36 @@ def create_task(task_data: dict) -> str:
         del task_data["is_active"]
         
     collection.insert_one(task_data)
+    
+    user_id = task_data.get("user_id")
+    if user_id:
+        from core.redis_client import invalidate_cache
+        invalidate_cache(f"tasks:{user_id}")
+        invalidate_cache(f"task_history:{str(new_id)}")
+        
     return str(new_id)
 
 
 def get_all_tasks(user_id: str) -> list:
+    from core.redis_client import get_cache, set_cache
+    import logging
+    logger = logging.getLogger(__name__)
+
+    cache_key = f"tasks:{user_id}"
+    cached_data = get_cache(cache_key)
+    if cached_data is not None:
+        return cached_data
+        
+    logger.info("CACHE MISS")
+    
     # include_inactive is no longer applicable with the new schema, we only return is_latest: True
     query = {"user_id": user_id, "is_latest": True}
 
     tasks = []
     for task in collection.find(query):
         tasks.append(serialize_task(_stringify_id(task)))
+        
+    set_cache(cache_key, tasks, ttl=300)
     return tasks
 
 
@@ -93,6 +113,13 @@ def update_task(task_group_id: str, task_data: dict) -> Optional[dict]:
     new_task["updated_at"] = _utc_now()
     
     collection.insert_one(new_task)
+    
+    user_id = old_task.get("user_id")
+    if user_id:
+        from core.redis_client import invalidate_cache
+        invalidate_cache(f"tasks:{user_id}")
+        invalidate_cache(f"task_history:{task_group_id}")
+        
     return get_task_by_id(task_group_id)
 
 
@@ -108,11 +135,31 @@ def soft_delete_task(task_group_id: str) -> Optional[dict]:
         return None
         
     old_task["is_latest"] = False
+    
+    user_id = old_task.get("user_id")
+    if user_id:
+        from core.redis_client import invalidate_cache
+        invalidate_cache(f"tasks:{user_id}")
+        invalidate_cache(f"task_history:{task_group_id}")
+        
     return serialize_task(_stringify_id(old_task))
 
 
 def get_history_by_task_group_id(task_group_id: str) -> list:
+    from core.redis_client import get_cache, set_cache
+    import logging
+    logger = logging.getLogger(__name__)
+
+    cache_key = f"task_history:{task_group_id}"
+    cached_data = get_cache(cache_key)
+    if cached_data is not None:
+        return cached_data
+
+    logger.info("CACHE MISS")
+
     records = []
     for record in collection.find({"task_group_id": task_group_id}).sort("version", -1):
         records.append(serialize_task(_stringify_id(record)))
+        
+    set_cache(cache_key, records, ttl=600)
     return records

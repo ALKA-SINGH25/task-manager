@@ -69,4 +69,29 @@ def initialize_indexes():
         unique=True
     )
 
+    # 6. Expenses user index
+    create_index_safe(
+        db.expenses,
+        [("user_id", 1)],
+        "expense_user_idx"
+    )
+
+    create_index_safe(
+        db.expenses,
+        [("user_id", 1), ("expense_date", -1)],
+        "expense_user_date_idx"
+    )
+
+    create_index_safe(
+        db.expenses,
+        [("user_id", 1), ("category", 1)],
+        "expense_user_cat_idx"
+    )
+
+    create_index_safe(
+        db.expenses,
+        [("user_id", 1), ("created_at", -1)],
+        "expense_user_created_idx"
+    )
+
     logger.info("MongoDB indexes initialized successfully")

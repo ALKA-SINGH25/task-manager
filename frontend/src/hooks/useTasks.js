@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
-import API_URL from "../config/api";
+import axiosInstance from "../config/axiosInstance";
 import { useAuth } from "../context/AuthContext";
 import { buildTaskPayload, buildUpdatePayload, parseApiError } from "../utils/taskHelpers";
 
@@ -9,22 +8,17 @@ const useTasks = (showToast) => {
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
 
-  const getHeaders = useCallback(
-    () => ({ Authorization: `Bearer ${token}` }),
-    [token]
-  );
-
   const fetchTasks = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await axios.get(`${API_URL}/tasks`, { headers: getHeaders() });
+      const res = await axiosInstance.get(`/tasks`);
       setTasks(res.data);
     } catch (error) {
       showToast?.(parseApiError(error), "error");
     } finally {
       setLoading(false);
     }
-  }, [token, getHeaders, showToast]);
+  }, [token, showToast]);
 
   useEffect(() => {
     fetchTasks();
@@ -33,7 +27,7 @@ const useTasks = (showToast) => {
   const createTask = async (taskData) => {
     try {
       const payload = buildTaskPayload(taskData);
-      await axios.post(`${API_URL}/tasks`, payload, { headers: getHeaders() });
+      await axiosInstance.post(`/tasks`, payload);
       await fetchTasks();
       showToast?.("Task created successfully", "success");
       return { success: true };
@@ -47,7 +41,7 @@ const useTasks = (showToast) => {
   const updateTask = async (id, taskData) => {
     try {
       const payload = buildUpdatePayload(taskData);
-      await axios.put(`${API_URL}/tasks/${id}`, payload, { headers: getHeaders() });
+      await axiosInstance.put(`/tasks/${id}`, payload);
       await fetchTasks();
       showToast?.("Task updated successfully", "success");
       return { success: true };
@@ -60,7 +54,7 @@ const useTasks = (showToast) => {
 
   const deleteTask = async (id) => {
     try {
-      await axios.delete(`${API_URL}/tasks/${id}`, { headers: getHeaders() });
+      await axiosInstance.delete(`/tasks/${id}`);
       await fetchTasks();
       showToast?.("Task deleted successfully", "success");
       return { success: true };

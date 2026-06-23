@@ -1,32 +1,30 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import API_URL from "../config/api";
+import { useState, useEffect, useCallback } from "react";
+import axiosInstance from "../config/axiosInstance";
 import { useAuth } from "../context/AuthContext";
 import { formatDate, getStatusLabel } from "../utils/taskHelpers";
 
 const ReadTaskModal = ({ task, onClose }) => {
-  const { token } = useAuth();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { token } = useAuth();
+
+  const fetchHistory = useCallback(async () => {
+    try {
+      if (token && task?._id) {
+        const res = await axiosInstance.get(`/tasks/${task._id}/history`);
+        setHistory(res.data);
+      }
+    } catch (err) {
+      setError("Failed to load task history.");
+    } finally {
+      setLoading(false);
+    }
+  }, [task?._id, token]);
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/tasks/${task._id}/history`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setHistory(res.data);
-      } catch (err) {
-        setError("Failed to load task history.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (token && task) {
-      fetchHistory();
-    }
-  }, [task, token]);
+    fetchHistory();
+  }, [fetchHistory]);
 
   return (
     <div className="modal-overlay" onClick={onClose}>

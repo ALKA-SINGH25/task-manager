@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-import API_URL from "../config/api";
+import axiosInstance from "../config/axiosInstance";
 import { useAuth } from "../context/AuthContext";
 
 const useAuthActions = () => {
@@ -16,15 +15,10 @@ const useAuthActions = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      const res = await axios.get(`${API_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axiosInstance.get(`/auth/me`);
       setCurrentUser(res.data);
     } catch (e) {
       console.error(e);
-      if (e.response && e.response.status === 401) {
-        logout();
-      }
     }
   };
 
@@ -32,7 +26,7 @@ const useAuthActions = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.post(`${API_URL}/auth/register`, {
+      const res = await axiosInstance.post(`/auth/register`, {
         name,
         email,
         password,
@@ -62,7 +56,7 @@ const useAuthActions = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.post(`${API_URL}/auth/login`, {
+      const res = await axiosInstance.post(`/auth/login`, {
         email,
         password,
       });
